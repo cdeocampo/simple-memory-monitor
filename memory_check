@@ -1,0 +1,10 @@
+#!/bin/bash
+TOTAL_MEMORY=$(free | grep Mem: | awk '{print $2}')
+USED_MEMORY=$(free | grep Mem: | awk '{print $3}')
+USAGE=$(bc <<<"scale=4; $USED_MEMORY / $TOTAL_MEMORY")
+USAGE_PERCENT=$(bc <<<"scale=2; $USAGE * 100")
+USAGE_PERCENT_PRECISION=$(printf "%.2f" $USAGE_PERCENT)
+
+echo "Total: $TOTAL_MEMORY"
+echo "Used: $USED_MEMORY"
+echo "Usage: $USAGE_PERCENT_PRECISION"
