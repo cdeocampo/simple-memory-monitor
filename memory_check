@@ -36,7 +36,7 @@ while getopts ":c:w:" opt; do
     esac
 done
 
-if [[ "$CRITICAL" -le "$WARNING" ]]; then
+if [[ $( echo "$CRITICAL <= $WARNING" | bc -l) -ne 0 ]]; then
     usage
     exit 10;
 fi
@@ -44,3 +44,14 @@ fi
 echo "Total: $TOTAL_MEMORY"
 echo "Used: $USED_MEMORY"
 echo "Usage: $USAGE_PERCENT_PRECISION"
+
+if [[ $( echo "$USAGE_PERCENT_PRECISION >= $CRITICAL" | bc -l) -ne 0 ]]; then
+    echo "CRITICAL!"
+    exit 2;
+elif [[ $( echo "$USAGE_PERCENT_PRECISION >= $WARNING" | bc -l) -ne 0 ]]; then
+    echo "WARNING!"
+    exit 1;
+else
+    echo "Everything's normal"
+    exit 0;
+fi
