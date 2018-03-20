@@ -1,9 +1,34 @@
 #!/bin/bash
+
 TOTAL_MEMORY=$(free | grep Mem: | awk '{print $2}')
 USED_MEMORY=$(free | grep Mem: | awk '{print $3}')
 USAGE=$(bc <<<"scale=4; $USED_MEMORY / $TOTAL_MEMORY")
 USAGE_PERCENT=$(bc <<<"scale=2; $USAGE * 100")
 USAGE_PERCENT_PRECISION=$(printf "%.2f" $USAGE_PERCENT)
+
+CRITICAL=0
+WARNING=0
+
+while getopts ":c:w:" opt; do
+    case $opt in
+        c)
+            echo "Supplied critical threshold: $OPTARG"
+            CRITICAL=$OPTARG
+            ;;
+        w)
+            echo "Supplied warning threshold: $OPTARG"
+            WARNING=$OPTARG
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            exit 1
+            ;;
+    esac
+done
 
 echo "Total: $TOTAL_MEMORY"
 echo "Used: $USED_MEMORY"
