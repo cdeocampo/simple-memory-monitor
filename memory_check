@@ -1,5 +1,13 @@
 #!/bin/bash
 
+usage() {
+    echo "Usage: memory_check -c <0-100> -w <0-100>"
+    echo "-c    Critical threshold (percentage)"
+    echo "-w    Warning threshold (percentage)"
+    echo ""
+    echo "NOTE: value of -c should be greater than the value of -w"
+}
+
 TOTAL_MEMORY=$(free | grep Mem: | awk '{print $2}')
 USED_MEMORY=$(free | grep Mem: | awk '{print $3}')
 USAGE=$(bc <<<"scale=4; $USED_MEMORY / $TOTAL_MEMORY")
@@ -12,23 +20,26 @@ WARNING=0
 while getopts ":c:w:" opt; do
     case $opt in
         c)
-            echo "Supplied critical threshold: $OPTARG"
             CRITICAL=$OPTARG
             ;;
         w)
-            echo "Supplied warning threshold: $OPTARG"
             WARNING=$OPTARG
             ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
-            exit 1
+            exit 10
             ;;
         :)
             echo "Option -$OPTARG requires an argument." >&2
-            exit 1
+            exit 10
             ;;
     esac
 done
+
+if [[ "$CRITICAL" -le "$WARNING" ]]; then
+    usage
+    exit 10;
+fi
 
 echo "Total: $TOTAL_MEMORY"
 echo "Used: $USED_MEMORY"
