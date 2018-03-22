@@ -1,4 +1,4 @@
-class memory_monitor {
+class memory_monitor ($email) {
     package { 'vim-enhanced':
         ensure => 'installed',
         name => 'vim-enhanced',
@@ -35,7 +35,7 @@ class memory_monitor {
         target => '/home/monitor/scripts/memory_check',
     }
     cron { 'memory_check_cron':
-        command => '/home/monitor/src/my_memory_check -c 80 -w 60',
+        command => "/home/monitor/src/my_memory_check -c 80 -w 60 -e \"$email\"",
         user => 'root',
         minute => '*/10',
     }
