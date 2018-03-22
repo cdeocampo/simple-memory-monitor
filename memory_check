@@ -65,7 +65,7 @@ while getopts ":c:w:e:" opt; do
     esac
 done
 
-if [[ ($( echo "$CRITICAL <= $WARNING" | bc -l) -ne 0) || ("$EMAIL" -eq "")  ]]; then
+if [[ ($( echo "$CRITICAL <= $WARNING" | bc -l) -ne 0) || "$EMAIL" = ""  ]]; then
     usage
     exit 10;
 fi
