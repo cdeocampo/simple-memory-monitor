@@ -17,6 +17,6 @@ class memory_monitor {
         home => '/home/monitor'
     }
     file { '/home/monitor/scripts':
-        ensure => 'directory'
+        ensure => 'directory',
     }
 }
