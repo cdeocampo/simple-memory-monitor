@@ -78,8 +78,8 @@ echo "Usage: $USAGE_PERCENT_PRECISION"
 
 if [[ $( echo "$USAGE_PERCENT_PRECISION >= $CRITICAL" | bc -l) -ne 0 ]]; then
     echo "CRITICAL!"
-    # top 10
-    TOP_PROCESSES=$(ps -eo pid,pmem,rss,cmd  | body sort -k 3 -nr | head -10)
+    # top 10 - as you can see below we use head -11 since the header is included
+    TOP_PROCESSES=$(ps -eo pid,pmem,rss,cmd  | body sort -k 3 -nr | head -11)
     mail_processes "$EMAIL" "$TOP_PROCESSES"
     exit 2;
 elif [[ $( echo "$USAGE_PERCENT_PRECISION >= $WARNING" | bc -l) -ne 0 ]]; then
