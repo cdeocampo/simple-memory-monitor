@@ -32,6 +32,11 @@ class memory_monitor {
     }
     file { '/home/monitor/src/my_memory_check':
         ensure => 'link',
-        target => '/home/monitor/scripts/memory_check'
+        target => '/home/monitor/scripts/memory_check',
+    }
+    cron { 'memory_check_cron':
+        command => '/home/monitor/src/my_memory_check -c 80 -w 60',
+        user => 'root',
+        minute => '*/10',
     }
 }
