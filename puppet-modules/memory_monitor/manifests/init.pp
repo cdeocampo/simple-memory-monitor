@@ -16,7 +16,7 @@ class memory_monitor {
         shell => '/bin/bash',
         home => '/home/monitor'
     }
-    file { '/home/monitor/scripts'
+    file { '/home/monitor/scripts':
         ensure => 'directory'
     }
 }
