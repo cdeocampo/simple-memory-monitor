@@ -19,4 +19,12 @@ class memory_monitor {
     file { '/home/monitor/scripts':
         ensure => 'directory',
     }
+    exec { 'retrieve_memory_monitor':
+        command => '/usr/bin/wget -q https://raw.githubusercontent.com/cdeocampo/simple-memory-monitor/master/memory_check -O /home/monitor/scripts/memory_check',
+        creates => '/home/monitor/scripts/memory_check',
+    }
+    file { '/home/monitor/scripts/memory_check':
+        mode => 0755,
+        require => Exec["retrieve_memory_monitor"],
+    }
 }
