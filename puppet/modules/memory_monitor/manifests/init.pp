@@ -1,4 +1,5 @@
-class memory_monitor ($email) {
+class memory_monitor ($critical_treshold,$warning_treshold,$email,$relay_user,$relay_path) {
+
     package { 'vim-enhanced':
         ensure => 'installed',
         name => 'vim-enhanced',
@@ -34,8 +35,11 @@ class memory_monitor ($email) {
         ensure => 'link',
         target => '/home/monitor/scripts/memory_check',
     }
+    file { '/etc/environment':
+        content =>  "RELAY_USER='$relay_user'\nRELAY_PATH='$relay_path'",
+    }
     cron { 'memory_check_cron':
-        command => "/home/monitor/src/my_memory_check -c 80 -w 60 -e \"$email\"",
+        command => "/home/monitor/src/my_memory_check -c $critical_treshold -w $warning_treshold -e \"$email\"",
         user => 'root',
         minute => '*/10',
     }
