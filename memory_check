@@ -4,8 +4,33 @@ usage() {
     echo "Usage: memory_check -c <0-100> -w <0-100>"
     echo "-c    Critical threshold (percentage)"
     echo "-w    Warning threshold (percentage)"
+    echo "-e    Email address to send the report"
     echo ""
     echo "NOTE: value of -c should be greater than the value of -w"
+}
+
+# grabbed from https://unix.stackexchange.com/questions/11856/sort-but-keep-header-line-at-the-top
+body() {
+    IFS= read -r header
+    printf '%s\n' "$header"
+    "$@"
+}
+
+timestamp() {
+    date +"%Y%m%d %H:%M"
+}
+
+mail_processes() {
+    TO=$1
+    FROM='Memory Nanny <mem_nanny@example.com>'
+    SUBJECT="$(timestamp) memory check - critical"
+    TEXT=$2
+
+    curl -s --user $RELAY_USER $RELAY_PATH \
+        -F from="$FROM" \
+        -F to="$TO" \
+        -F subject="$SUBJECT" \
+        -F text="$TEXT"
 }
 
 TOTAL_MEMORY=$(free | grep Mem: | awk '{print $2}')
@@ -16,14 +41,18 @@ USAGE_PERCENT_PRECISION=$(printf "%.2f" $USAGE_PERCENT)
 
 CRITICAL=0
 WARNING=0
+EMAIL=''
 
-while getopts ":c:w:" opt; do
+while getopts ":c:w:e:" opt; do
     case $opt in
         c)
             CRITICAL=$OPTARG
             ;;
         w)
             WARNING=$OPTARG
+            ;;
+        e)
+            EMAIL=$OPTARG
             ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
@@ -36,7 +65,7 @@ while getopts ":c:w:" opt; do
     esac
 done
 
-if [[ $( echo "$CRITICAL <= $WARNING" | bc -l) -ne 0 ]]; then
+if [[ ($( echo "$CRITICAL <= $WARNING" | bc -l) -ne 0) || ("$EMAIL" -eq "")  ]]; then
     usage
     exit 10;
 fi
@@ -45,8 +74,13 @@ echo "Total: $TOTAL_MEMORY"
 echo "Used: $USED_MEMORY"
 echo "Usage: $USAGE_PERCENT_PRECISION"
 
+
+
 if [[ $( echo "$USAGE_PERCENT_PRECISION >= $CRITICAL" | bc -l) -ne 0 ]]; then
     echo "CRITICAL!"
+    # top 10
+    TOP_PROCESSES=$(ps -eo pid,pmem,rss,cmd  | body sort -k 3 -nr | head -10)
+    mail_processes "$EMAIL" "$TOP_PROCESSES"
     exit 2;
 elif [[ $( echo "$USAGE_PERCENT_PRECISION >= $WARNING" | bc -l) -ne 0 ]]; then
     echo "WARNING!"
